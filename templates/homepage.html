@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResumeRank Pro - Smart Resume Ranking System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/hm.css">
+</head>
+<body>
+    <header>
+        <div class="container header-container">
+            <a href="{{ url_for('index') }}" class="logo"><span>SkillRank</span></a>
+        </div>
+    </header>
+
+    <div class="container">
+        {% if profession %}
+        <div class="upload-section">
+            <form method="POST" action="{{ url_for('homepage') }}" enctype="multipart/form-data" id="uploadForm">
+                <div class="upload-box" id="uploadBox" style="cursor: pointer;">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h3>Upload Resume PDF</h3>
+                <p>Select or drag multiple resume PDFs</p>
+                <input type="file" name="resumes" accept=".pdf" multiple required id="resumeInput" style="display: none;">
+                <p id="fileNames" style="margin-top:10px; font-size: 0.9em; color: #555;"></p>
+                </div>
+            </form>
+        </div>
+
+        <div class="controls">
+            <button type="submit" form="uploadForm" id="uploadSubmitBtn" class="rankBtn" disabled>
+                <i class="fas fa-trophy"></i> Rank Resumes
+            </button>
+
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by name, skills...">
+                <i class="fas fa-search"></i>
+            </div>
+        </div>
+
+        
+        <div class="results-section">
+            <h2><i class="fas fa-list-ol"></i> Ranking Results ({{ profession }})</h2>
+
+            <div class="filters">
+                <select id="sortSelect">
+                    <option value="score">Sort by Score</option>
+                    <option value="education">Sort by Education</option>
+                </select>
+                <button id="exportBtn"><i class="fas fa-file-export"></i> Export Results</button>
+            </div>
+
+            {% if results %}
+            <div class="results-table">
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Score</th>
+                            <th>Experience</th>
+                            <th>Qualifications</th>
+                            <th>Skills</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        {% for model_name, resumes in results.items() %}
+                            {% for resume in resumes %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ resume.filename }}</td>
+                                <td>{{ resume.similarity_score }}</td>
+                                <td>
+                                    <ul>
+                                        {% for exp in resume.experience_texts %}
+                                            <li>{{ exp }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                                <td>{{ resume.education | join(', ') }}</td>
+                                <td>{{ resume.skills | join(', ') }}</td>
+                                <td>{% if resume.passed %}<span style="color: green">Pass</span>{% else %}<span style="color: red">Fail</span>{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+            {% if not results %}
+            <div class="no-results" id="noResults">
+                <i class="fas fa-file-search"></i>
+                <p>No resumes uploaded yet. Upload some resumes to see rankings.</p>
+            </div>
+            {% endif %}
+        </div>
+
+
+        {% endif %}
+    </div>
+
+    <footer>
+        <div class="container">
+            <p class="copyright">© 2025 SkillRank. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script src="/static/js/hm.js"></script>
+    <script>
+    document.getElementById('uploadBox').addEventListener('click', () => {
+        document.getElementById('resumeInput').click();
+    });
+    </script>
+</body>
+</html>
